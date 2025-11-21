@@ -1,0 +1,161 @@
+{
+  "name": "Send Voice",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -576,
+        -32
+      ],
+      "id": "58e23c72-5d6a-42bb-b27d-7dc5b4b4616b",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "resource": "fileFolder",
+        "returnAll": true,
+        "filter": {},
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        -320,
+        -96
+      ],
+      "id": "d06de2b8-fe58-4463-afc6-e175f9b6b777",
+      "name": "Search files and folders",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "9EtniAUKnbvjThFv",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "={{ $json.id }}",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        -48,
+        -48
+      ],
+      "id": "8759b262-680d-408c-96e6-1153a90e9745",
+      "name": "Download file",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "9EtniAUKnbvjThFv",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "messages-api",
+        "operation": "send-audio",
+        "media": "={{ $json.base64 }}",
+        "options_message": {}
+      },
+      "type": "n8n-nodes-evolution-api-english.evolutionApi",
+      "typeVersion": 1,
+      "position": [
+        528,
+        -64
+      ],
+      "id": "3595fc99-179b-48e4-8a2a-b12cb7decfd4",
+      "name": "Send audio",
+      "credentials": {
+        "evolutionApi": {
+          "id": "YcHhXRu9nFdiGhe6",
+          "name": "Evolution account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const binaryProperty = 'data';\n\nconst buffer = await this.helpers.getBinaryDataBuffer(0, binaryProperty);\n\nconst base64 = buffer.toString('base64');\n\nconst bin = items[0].binary[binaryProperty];\n\nreturn [\n  {\n    json: {\n      base64,\n      mimeType: bin.mimeType,\n      fileName: bin.fileName,\n    }\n  }\n];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        224,
+        -160
+      ],
+      "id": "b942cf99-2451-4532-ba80-4477e34e01ce",
+      "name": "Code in JavaScript"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Search files and folders",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search files and folders": {
+      "main": [
+        [
+          {
+            "node": "Download file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download file": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send audio": {
+      "main": [
+        []
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Send audio",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "2f5dc6b5-63b1-4642-894b-20c25f447fac",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "1570fe637cb9b0f747c885bfc880eeff18c513418243a76fe045749a8150669c"
+  },
+  "id": "vUOXdYDg38DA3pRd",
+  "tags": []
+}
